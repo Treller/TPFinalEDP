@@ -37,7 +37,19 @@ public class SimulationEinterfaz {
 		s.addPopulation(Gen0);
 	}
 
-	public void opcionElegida(String opcion) {
-		
+	public boolean opcionElegida(String opcion) {
+		if (opcion.equalsIgnoreCase("1")) {
+			return true;
+		}else if(opcion.equalsIgnoreCase("2")) {
+			return true;
+		}else if(opcion.equalsIgnoreCase("3")) {
+			return true;
+		}else if(opcion.equalsIgnoreCase("4")) {
+			//System.out.println("Esta seguro? Recuerde que se eliminaran todos los datos generados dentro de la Simulacion");
+			return false;
+		}else {
+			System.out.println("No se ha ingresado una opcion valida. Por favor, vuelva a intentarlo.");
+			return true;
+		}
 	}
 }
