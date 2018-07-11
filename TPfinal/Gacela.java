@@ -1,6 +1,5 @@
 package TPfinal;
 
-import java.util.Random;
 
 public class Gacela{
 	//sizes
@@ -19,17 +18,41 @@ public class Gacela{
 			this.adn = adnAleatorio();
 		}
 	}
+	
 	//constructor2
-	//de reproduccion
+	//de reproduccion, depende del int tipoReproduccion
 	public Gacela(Gacela g1, Gacela g2) {
-
+		if(g1.tipoReproduccion == 0 || g2.tipoReproduccion == 0) { //si alguno es esteril, no se reproducen
+			//no se reproducen
+		}
+		else if(g1.tipoReproduccion != g2.tipoReproduccion) {// si son distintos es que uno es 1 y el otro es 2
+			
+		}else {
+			//en este caso o son ambos 1, o son ambos 2
+		}
 	}
 
 	//getters
 	public String getAdn() {
 		return this.adn;
 	}
+	public boolean porMorir() {
+		return this.porMorir;
+	}
+	
+	public int tipoReproduccion() {
+		return this.tipoReproduccion;
+	}
 
+	//setters
+	public void setADN(String newADN){
+		if(this.adn == null) {
+			this.adn = newADN;
+		}
+	}
+	
+	
+	
 	public static int getRandomIntBetween(int min, int max) {
 		if (max < min) {
 			throw new IllegalArgumentException();
@@ -38,9 +61,8 @@ public class Gacela{
 	}
 
 	private String adnAleatorio() {
-		Simulation sim = new Simulation();
-		String gen = sim.secuenciasaInsertar(getRandomIntBetween(1, 7)); //asi obtengo un gen aleatorio
-
+		
+		//creacion de ADN aleatorio
 		StringBuilder newADN = new StringBuilder();
 		char[] subset = "CGAT".toCharArray();//genero bases nitrogenadas aleatorias
 
@@ -51,7 +73,9 @@ public class Gacela{
 		}
 		newADN.append(buf);
 
-		//pensar bien los indices! Esto inserta un gen de la tabla 1 en cualquier lugar
+		//Y esto inserta un Gen de cualquiera de los de la Tabla 1 en cualquier lugar
+		Simulation sim = new Simulation();
+		String gen = sim.getSecuenciaADN(getRandomIntBetween(1, 7)); //asi obtengo un gen aleatorio
 		int desde = getRandomIntBetween(0, this.len - this.sizeGen); //numero aletorio donde entra un gen
 		//System.out.println(desde);
 		int indexGen = 0;
