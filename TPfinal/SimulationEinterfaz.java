@@ -55,21 +55,18 @@ public class SimulationEinterfaz {
 		s.addPopulation(Gen0);
 	}
 
+	//Metodo principal de esta clase es opcionElegida!
 	public boolean opcionElegida(String opcion, Scanner sc) {
 		if (opcion.equalsIgnoreCase("1")) {
 			this.reproduccion();
-			this.mutacion(sc);
+			this.mutacion(sc); //Scanner necesario para cambiar Base Nitrogenada
 			this.muerte();
 			return true;
 		}else if(opcion.equalsIgnoreCase("2")) {
-			for(Generacion gener : s.getGeneraciones()) {
-				System.out.println("Generacion: " + gener.genNumber());
-				for(Gacela g : gener.getListaGacelas()) {
-					System.out.println(g.getAdn());
-				}
-			}
+			this.listarGacelasVivas(sc); //Scanner necesario para preguntar si exportar
 			return true;
 		}else if(opcion.equalsIgnoreCase("3")) {
+			this.listarGacelasMuertas(sc);//Scanner necesario para preguntar si exportar
 			return true;
 		}else if(opcion.equalsIgnoreCase("4")) {
 			System.out.println("Esta seguro? Recuerde que se eliminaran todos los datos generados dentro de la Simulacion");
@@ -79,7 +76,7 @@ public class SimulationEinterfaz {
 			}else {
 				return true;
 			}
-			
+
 		}else {
 			System.out.println("No se ha ingresado una opcion valida. Por favor, vuelva a intentarlo.");
 			return true;
@@ -182,9 +179,9 @@ public class SimulationEinterfaz {
 
 	private void muerte(){
 		List<Gacela> GenMuertePorVejez = this.s.getTodasMenosUltimaGener((float) 0.1); //remueve 10% de las gacelas
-		for(Gacela gac : GenMuertePorVejez) {
+		for(Gacela gac : GenMuertePorVejez) { //para cada gacela de todas las generaciones menos la mas nueva
 			gac.setMuertePorVejez(); //cambia a true el status de muerte por vejez
-			s.addDeathMap(gac.getCausaDeMuerte(), gac); //agrega al death map
+			s.addDeathMap("Vejez", gac); //agrega al death map por causa: Vejez
 		}
 		//listo vejez, ahora la ultima generacion puede morir por mutaciones
 		List<Gacela> ultimaGenMuerePorMutac = this.s.getGeneraciones().get(s.getCountGeneration()-1).getListaGacelas();
@@ -195,37 +192,101 @@ public class SimulationEinterfaz {
 				ultimaGenMuerePorMutac.remove(gac); //y se elimina de la lista
 			}
 		}
-		
+
 	}
-	
+
+	private void listarGacelasVivas(Scanner sc){
+		StringBuilder ans = new StringBuilder();
+		for(Generacion gener : s.getGeneraciones()) {//getGeneraciones devuelve population, donde estan todas las vivas
+			System.out.println("Generacion: " + gener.genNumber());
+			for(Gacela g : gener.getListaGacelas()) {
+				if(g != null) {
+					System.out.println(g.getAdn());//muestro en pantalla
+					ans.append(g.getAdn()); //aniado la cadena de adn
+					ans.append(System.getProperty("line.separator"));//agrego un enter
+				}
+			}
+		}
+		System.out.println("Desea guardar las gacelas exportadas a un txt?");
+		System.out.println("Ingrese OK si esta seguro o cualquier cosa si no lo esta");
+		if(sc.next().equalsIgnoreCase("OK")) {
+			boolean flagGacelasVivas = true;
+			while(flagGacelasVivas) {
+				System.out.println("Por favor ingrese un Path valido"); //si no existe el archivo lo crea
+				String path = sc.next();
+				try {
+					f.writeToFile(path, ans.toString());
+					flagGacelasVivas = false;
+				} catch (IOException e) {
+					System.out.println("El path ingresado no es valido.");
+				}
+			}
+		} //solo escribe en el path si el usuario ingresa OK
+	} 
+
+	private void listarGacelasMuertas(Scanner sc){
+		StringBuilder ans = new StringBuilder();
+		for(int causa =1; causa < 7; causa++) {//recorre las 6 causas de muertes que hay
+			System.out.println(s.getSecuenciaADNSignificados(causa) + ":");
+			for(Gacela gac : this.s.getDeathMap().get(s.getSecuenciaADNSignificados(causa))) { //para cada gacela clasificada por causa
+				if(gac != null) {
+					System.out.println(gac.getAdn());
+					ans.append(gac.getAdn());
+					ans.append(System.getProperty("line.separator")); //pongo un enter
+				}
+			}
+		}//al llegar aca ya recorrio todas las gacelas
+		System.out.println("Desea guardar las gacelas exportadas a un txt?");
+		System.out.println("Ingrese OK si esta seguro o cualquier cosa si no lo esta");
+		if(sc.next().equalsIgnoreCase("OK")) {
+			boolean flagGacelasMuertas = true;
+			while(flagGacelasMuertas) {
+				System.out.println("Por favor ingrese un Path valido"); //si no existe el archivo lo crea
+				String path = sc.next();
+				try {
+					f.writeToFile(path, ans.toString());
+					flagGacelasMuertas = false;
+				} catch (IOException e) {
+					System.out.println("El path ingresado no es valido.");
+				}
+			}
+		} //solo escribe en el path si el usuario ingresa OK
+	}
+
 	public void createGen(Gacela g1, Gacela g2, int count, List<Gacela> generationNueva) {
 		//se chequea externamente antes de llamar a esta funcion si alguno es esteril
+		System.out.println("empieza createGen");
+		System.out.println(g1.getLen() + " Initial G1");
 		if(g1.getTipoReproduccion() != g2.getTipoReproduccion()) {// si son distintos es que uno es 1 y el otro es 2
 			int mid = g1.getLen()/2;
 			if(g1.getRandomIntBetween(1, 2) == 2) {
-				String adn1 = g1.getAdn().substring(0, mid-1) + g2.getAdn().substring(mid, g1.getLen()-1);
-				String adn2 = g2.getAdn().substring(0, mid-1) + g1.getAdn().substring(mid, g1.getLen()-1);
+				String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());// el 1er indice de substring es inclusivo y el 2do exclusivo
+				String adn2 = g2.getAdn().substring(0, mid) + g1.getAdn().substring(mid, g1.getLen());
+				System.out.println(adn1.length() + adn2.length());
 				g1.setADN(adn1);
 				g2.setADN(adn2);
 				generationNueva.add(g1);
 				generationNueva.add(g2);
 			}else{
-				String adn1 = g1.getAdn().substring(0, mid-1) + g2.getAdn().substring(mid, g1.getLen()-1);
+				String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());
+				System.out.println(adn1.length());
 				g1.setADN(adn1);
 				generationNueva.add(g1);
 			}
 			//en este caso o son ambos 1, o son ambos 2
 		}else if(g1.getTipoReproduccion() == 2){
 			int mid = g1.getLen()/2;
-			String adn1 = g1.getAdn().substring(0, mid-1) + g2.getAdn().substring(mid, g1.getLen()-1);
-			String adn2 = g2.getAdn().substring(0, mid-1) + g1.getAdn().substring(mid, g1.getLen()-1);
+			String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());
+			String adn2 = g2.getAdn().substring(0, mid) + g1.getAdn().substring(mid, g1.getLen());
+			System.out.println(adn1.length() + adn2.length());
 			g1.setADN(adn1);
 			g2.setADN(adn2);
 			generationNueva.add(g1);
 			generationNueva.add(g2);
 		}else {
 			int mid = g1.getLen()/2;
-			String adn1 = g1.getAdn().substring(0, mid-1) + g2.getAdn().substring(mid, g1.getLen()-1);
+			String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());
+			System.out.println(adn1.length());
 			g1.setADN(adn1);
 			generationNueva.add(g1);
 		}

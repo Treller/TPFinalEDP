@@ -9,7 +9,7 @@ public class Gacela{
 	private String adn;
 	private int tipoReproduccion = 2; //2 hijos, 1 hijo , o esteril (0 hijos)
 	private boolean porMorir = false; //true si muere por un gen de muerte
-	private String causaDeMuerte = new String();
+	private String causaDeMuerte = new String(); //solo se actualiza por los genes de muerte, no vejez
 	private boolean vejez = false; //solo el 10% va a tener asignado true esta propiedad
 	//estructuras de ayuda
 	private Simulation sim = new Simulation();
@@ -78,7 +78,7 @@ public class Gacela{
 		if(this.adn.indexOf(sim.getSecuenciaADN(6)) != -1) { //primero reviso si es esteril
 			this.tipoReproduccion = 0; //entonces puede tener cero hijos (es decir, no puede tener hijos)
 		}
-		else if(this.adn.indexOf(sim.getSecuenciaADN(7)) != -1) { //si solo puede tener un hijo Y no hay gen de muerte
+		else if(this.adn.indexOf(sim.getSecuenciaADN(7)) != -1) { //si solo puede tener un hijo Y no hay gen de esterilidad
 			this.tipoReproduccion = 1;
 		}else {
 			this.tipoReproduccion = 2; //y si no hay gen esteril o un hijo, se deja por default dos hijos

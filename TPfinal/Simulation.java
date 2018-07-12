@@ -35,6 +35,10 @@ public class Simulation {
 	public int getCountGeneration() {
 		return countGeneration;
 	}
+	
+	public Map<String,List<Gacela>> getDeathMap(){
+		return this.deathMap;
+	}
 
 	public List<Gacela> getVivas() {
 		List<Gacela> ans = new LinkedList<>();
@@ -50,13 +54,13 @@ public class Simulation {
 		int len = this.population.size() - 1;
 		List<Gacela> ans = new LinkedList<>();
 
-		for(Gacela g : (this.population.get(len)).getListaGacelas()) {
-			ans.add(g);
+		for(Gacela g : (this.population.get(len)).getListaGacelas()) {//asi obtengo el ultimo de la lista (la ultima generacion)
+			ans.add(g); //agrego sin modificar en this.population
 		}
 
-		if(len>0) {
+		if(len>0) { //es decir, si hay mas generaciones ademas de la inicial
 			for(Gacela g : (this.population.get(len - 1)).getListaGacelas()) {
-				ans.add(g);
+				ans.add(g); //agrego tambien estos candidatos
 			}
 		}
 		return ans;
@@ -85,7 +89,7 @@ public class Simulation {
 	public List<Gacela> getTodasMenosUltimaGener(float porcentaje){
 		List<Gacela> ans = new LinkedList<>();
 		for(int i=0; i<this.countGeneration-1; i++) { //itera en todas menos la ultima
-			List<Gacela> Gen = this.population.get(i).getListaGacelas();
+			List<Gacela> Gen = this.population.get(i).getListaGacelas(); //retorna la lista gacela de la posicion iesima
 			
 			int contador = (int) (Gen.size()*porcentaje); //necesito agarrar solo el 10% caso Vejez
 			for(int i2=0; i2<contador; i2++) {
