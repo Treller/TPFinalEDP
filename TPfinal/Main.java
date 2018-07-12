@@ -11,11 +11,16 @@ public class Main {
 		SimulationEinterfaz Simulac = new SimulationEinterfaz();
 		boolean flagGeneral = true;
 		boolean flagPoblacInic = true; //true mientras que no se haya cargado la poblacion inicial
+		boolean flagGenerarAlAzar = true;
 
 		while(flagGeneral) {
-			
+
+			while(flagGenerarAlAzar) {
+				flagGenerarAlAzar = Simulac.generarAlAzar(sc, flagPoblacInic);
+			}
+
 			while(flagPoblacInic) {
-			flagPoblacInic = Simulac.calcularPoblacInic(sc, flagPoblacInic);
+				flagPoblacInic = Simulac.calcularPoblacInic(sc, flagPoblacInic);
 			}
 
 			System.out.println("\tMenú del programa:");

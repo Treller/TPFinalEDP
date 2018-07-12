@@ -123,7 +123,7 @@ public class Gacela{
 			newADN.setCharAt(i, gen.charAt(indexGen));
 			indexGen++;
 		}
-
+		
 		return newADN.toString();
 	}
 

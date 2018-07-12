@@ -14,11 +14,11 @@ public class SimulationEinterfaz {
 
 	//constructor
 	public SimulationEinterfaz() {
-		System.out.println("Welcome to the Gacelas simulation");
-		System.out.println("Please, enter the first generation path to txt file");
+		System.out.println("Bienvenido a la Simulacion de Gacelas para el proyecto de Investigac de Africa");
 	}
 
 	public boolean calcularPoblacInic(Scanner sc, boolean flagPoblacInic) { //no pasa copia del scanner, como es no primitivo pasa referencia
+		System.out.println("Por favor, ingrese la primera generation path a txt file");
 		while(flagPoblacInic) {
 			String path = sc.next();
 			String poblacInicial = this.readFile(path);
@@ -255,21 +255,21 @@ public class SimulationEinterfaz {
 
 	public void createGen(Gacela g1, Gacela g2, int count, List<Gacela> generationNueva) {
 		//se chequea externamente antes de llamar a esta funcion si alguno es esteril
-		System.out.println("empieza createGen");
-		System.out.println(g1.getLen() + " Initial G1");
+		//System.out.println("empieza createGen");
+		//System.out.println(g1.getLen() + " Initial G1");
 		if(g1.getTipoReproduccion() != g2.getTipoReproduccion()) {// si son distintos es que uno es 1 y el otro es 2
 			int mid = g1.getLen()/2;
 			if(g1.getRandomIntBetween(1, 2) == 2) {
 				String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());// el 1er indice de substring es inclusivo y el 2do exclusivo
 				String adn2 = g2.getAdn().substring(0, mid) + g1.getAdn().substring(mid, g1.getLen());
-				System.out.println(adn1.length() + adn2.length());
+				//System.out.println(adn1.length() + adn2.length());
 				g1.setADN(adn1);
 				g2.setADN(adn2);
 				generationNueva.add(g1);
 				generationNueva.add(g2);
 			}else{
 				String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());
-				System.out.println(adn1.length());
+				//System.out.println(adn1.length());
 				g1.setADN(adn1);
 				generationNueva.add(g1);
 			}
@@ -278,7 +278,7 @@ public class SimulationEinterfaz {
 			int mid = g1.getLen()/2;
 			String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());
 			String adn2 = g2.getAdn().substring(0, mid) + g1.getAdn().substring(mid, g1.getLen());
-			System.out.println(adn1.length() + adn2.length());
+			//System.out.println(adn1.length() + adn2.length());
 			g1.setADN(adn1);
 			g2.setADN(adn2);
 			generationNueva.add(g1);
@@ -286,9 +286,34 @@ public class SimulationEinterfaz {
 		}else {
 			int mid = g1.getLen()/2;
 			String adn1 = g1.getAdn().substring(0, mid) + g2.getAdn().substring(mid, g1.getLen());
-			System.out.println(adn1.length());
+			//System.out.println(adn1.length());
 			g1.setADN(adn1);
 			generationNueva.add(g1);
 		}
+	}
+
+	public boolean generarAlAzar(Scanner sc, boolean flagPoblacInic) {
+		System.out.println("Desea Generar al azar las Gacelas?");
+		System.out.println("De ser asi, por favor ingrese Ok");
+		System.out.println("En caso contrario, escriba cualquier otra cosa");
+		if(sc.next().equalsIgnoreCase("Ok")) {
+			System.out.println("Elija el numero de Gacelas a crear");
+			int num = sc.nextInt();
+			if (num <= 0) {
+				System.out.println("El numero no es valido");
+				return true;
+			}else {
+				List<Gacela> generationZero = new LinkedList<>();
+				for(int numgacelas = 0; numgacelas < num; numgacelas++) {//genero num Gacelas con ADN aleatorio
+					Gacela g = new Gacela(true); //el boolean es true para que sea aleatorio
+					generationZero.add(g); //se agregan las gacelas a la lista correspondiente a la generacion cero
+				}
+				Generacion Gen0 = new Generacion(generationZero, 0); //se agrega la lista con su numero de generacion
+				s.addPopulation(Gen0);// y se agrega a la poblacion
+				flagPoblacInic = false; //asi no se setea desde un txt file
+				return false;
+			}
+		}else {
+			return false;}
 	}
 }
