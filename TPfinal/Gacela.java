@@ -8,29 +8,22 @@ public class Gacela{
 	//main structure
 	private String adn;
 	private int tipoReproduccion = 2; //2 hijos, 1 hijo , o esteril (0 hijos)
-	private boolean porMorir = false;
+	private boolean porMorir = false; //true si muere por un gen de muerte
+	private String causaDeMuerte;
+	private boolean vejez = false; //solo el 10% va a tener asignado true esta propiedad
+	//estructuras de ayuda
+	private Simulation sim = new Simulation();
 
-	//constructor1
+	//constructor
 	//si el boolean es true:
 	//generacion aleatoria + gen de los listados en tabla1
 	public Gacela(boolean flag){
 		if(flag) {
 			this.adn = adnAleatorio();
+			this.actualizarSegunGenes();
 		}
 	}
-	
-	//constructor2
-	//de reproduccion, depende del int tipoReproduccion
-	public Gacela(Gacela g1, Gacela g2) {
-		if(g1.tipoReproduccion == 0 || g2.tipoReproduccion == 0) { //si alguno es esteril, no se reproducen
-			//no se reproducen
-		}
-		else if(g1.tipoReproduccion != g2.tipoReproduccion) {// si son distintos es que uno es 1 y el otro es 2
-			
-		}else {
-			//en este caso o son ambos 1, o son ambos 2
-		}
-	}
+
 
 	//getters
 	public String getAdn() {
@@ -39,21 +32,59 @@ public class Gacela{
 	public boolean porMorir() {
 		return this.porMorir;
 	}
-	
-	public int tipoReproduccion() {
+
+	public int getTipoReproduccion() {
 		return this.tipoReproduccion;
+	}
+
+	public int getLen() {
+		return this.len;
 	}
 
 	//setters
 	public void setADN(String newADN){
-		if(this.adn == null) {
-			this.adn = newADN;
+		this.adn = newADN;
+		this.actualizarSegunGenes();
+	}
+
+	private void actualizarSegunGenes() {
+		//reviso los genes de Muerte
+		boolean flagMuerte = false; //se mantiene falso si no tiene gen muerte
+		for(int num = 1; num<6;num++) {
+			if((this.adn.indexOf(sim.getSecuenciaADN(num)) != -1) && !flagMuerte) { //chequeo si hay gen de muerte
+				flagMuerte = true;
+				this.causaDeMuerte = sim.getSecuenciaADNSignificados(num); 
+				//se le da la causa de muerte de la primer causa de muerte encontrada (en el caso de haber varias)
+			}
+		}
+		if(flagMuerte) { //si es true es que hay gen de muerte
+			this.porMorir = true; //entonces cambia el estado a true
+		}else {
+			this.porMorir = false; //caso contrario no hay gen de muerte
+		}
+		//reviso los genes de reproduccion
+		if(this.adn.indexOf(sim.getSecuenciaADN(6)) != -1) { //primero reviso si es esteril
+			this.tipoReproduccion = 0; //entonces puede tener cero hijos (es decir, no puede tener hijos)
+		}
+		else if(this.adn.indexOf(sim.getSecuenciaADN(7)) != -1) { //si solo puede tener un hijo Y no hay gen de muerte
+			this.tipoReproduccion = 1;
+		}else {
+			this.tipoReproduccion = 2; //y si no hay gen esteril o un hijo, se deja por default dos hijos
+		}
+
+	}
+
+	private void oldDeathChance(){
+		if(this.getRandomIntBetween(0, 9) == 5) { //son diez posibilidades, la distribuc es uniforme, solo hay 10% de probab
+			this.vejez = true;
 		}
 	}
-	
-	
-	
-	public static int getRandomIntBetween(int min, int max) {
+
+	public void impPant(){
+		System.out.println(this.adn);
+	}
+
+	public int getRandomIntBetween(int min, int max) {
 		if (max < min) {
 			throw new IllegalArgumentException();
 		}
@@ -61,7 +92,7 @@ public class Gacela{
 	}
 
 	private String adnAleatorio() {
-		
+
 		//creacion de ADN aleatorio
 		StringBuilder newADN = new StringBuilder();
 		char[] subset = "CGAT".toCharArray();//genero bases nitrogenadas aleatorias
