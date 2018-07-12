@@ -10,10 +10,13 @@ public class Main {
 
 		SimulationEinterfaz Simulac = new SimulationEinterfaz();
 		boolean flagGeneral = true;
+		boolean flagPoblacInic = true; //true mientras que no se haya cargado la poblacion inicial
 
 		while(flagGeneral) {
 			
-			Simulac.calcularPoblacInic(sc);
+			while(flagPoblacInic) {
+			flagPoblacInic = Simulac.calcularPoblacInic(sc, flagPoblacInic);
+			}
 
 			System.out.println("\tMenú del programa:");
 			System.out.println("\tIngrese 1 para Simular Nueva Generacion");

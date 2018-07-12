@@ -9,7 +9,7 @@ public class Gacela{
 	private String adn;
 	private int tipoReproduccion = 2; //2 hijos, 1 hijo , o esteril (0 hijos)
 	private boolean porMorir = false; //true si muere por un gen de muerte
-	private String causaDeMuerte;
+	private String causaDeMuerte = new String();
 	private boolean vejez = false; //solo el 10% va a tener asignado true esta propiedad
 	//estructuras de ayuda
 	private Simulation sim = new Simulation();
@@ -41,12 +41,24 @@ public class Gacela{
 		return this.len;
 	}
 
+	public boolean estadoVejez(){
+		return this.vejez;
+	}
+	
+	public String getCausaDeMuerte(){
+		return this.causaDeMuerte;
+	}
+	
 	//setters
 	public void setADN(String newADN){
 		this.adn = newADN;
 		this.actualizarSegunGenes();
 	}
 
+	public void setMuertePorVejez(){
+		this.vejez = true;
+	}
+	
 	private void actualizarSegunGenes() {
 		//reviso los genes de Muerte
 		boolean flagMuerte = false; //se mantiene falso si no tiene gen muerte
@@ -74,15 +86,12 @@ public class Gacela{
 
 	}
 
-	private void oldDeathChance(){
-		if(this.getRandomIntBetween(0, 9) == 5) { //son diez posibilidades, la distribuc es uniforme, solo hay 10% de probab
-			this.vejez = true;
-		}
-	}
+//	private void oldDeathChance(){
+//		if(this.getRandomIntBetween(0, 9) == 5) { //son diez posibilidades, la distribuc es uniforme, solo hay 10% de probab
+//			this.vejez = true;
+//		}
+//	}
 
-	public void impPant(){
-		System.out.println(this.adn);
-	}
 
 	public int getRandomIntBetween(int min, int max) {
 		if (max < min) {

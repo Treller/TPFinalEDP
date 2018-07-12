@@ -20,6 +20,7 @@ public class Simulation {
 	//constructor
 	public Simulation(){
 		inicializarSecuenciasADN();
+		inicializarDeathMap();
 	}
 
 	//getters
@@ -65,12 +66,15 @@ public class Simulation {
 		return this.population;
 	}
 	
-	public List<Gacela> getUltimaGenerParaMutac(){
+	
+	//setters
+	
+	public List<Gacela> getUltimaGenerParaMutacoVejez(float porcentaje){
 		List<Gacela> ans = new LinkedList<>();
-		//countGeneration empieza desde cero por lo que comparte index de la lista
-		List<Gacela> ultimaGen = this.population.get(this.countGeneration).getListaGacelas(); //apunta a la lista de Gacelas de la ultima gen
+		//countGeneration empieza desde uno por lo que No comparte index de la lista (es mayor +1)
+		List<Gacela> ultimaGen = this.population.get(this.countGeneration-1).getListaGacelas(); //apunta a la lista de Gacelas de la ultima gen
 		
-		int contador = (int) (ultimaGen.size()*0.5); //necesito agarrar solo el 50%
+		int contador = (int) (ultimaGen.size()*porcentaje); //necesito agarrar solo el 50% caso Mutac
 		for(int i=0; i<contador; i++) {
 			ans.add(ultimaGen.remove(getRandomIntBetween(0, ultimaGen.size() - 1)));
 			//sortea un elemento (se toma aleatoriamente) y lo saca para ponerlo en ans, hasta tener el 50% deseado
@@ -78,11 +82,47 @@ public class Simulation {
 		return ans; 
 	}
 	
-	//setters
+	public List<Gacela> getTodasMenosUltimaGener(float porcentaje){
+		List<Gacela> ans = new LinkedList<>();
+		for(int i=0; i<this.countGeneration-1; i++) { //itera en todas menos la ultima
+			List<Gacela> Gen = this.population.get(i).getListaGacelas();
+			
+			int contador = (int) (Gen.size()*porcentaje); //necesito agarrar solo el 10% caso Vejez
+			for(int i2=0; i2<contador; i2++) {
+				ans.add(Gen.remove(getRandomIntBetween(0, Gen.size() - 1)));
+				//asi el 10% al azar de cada generacion muere por causa vejez
+			}
+		}
+		return ans;
+	}
+	
+	public void addUltimaGener(Gacela gac){
+		List<Gacela> ultimaGen = this.population.get(this.countGeneration-1).getListaGacelas(); //apunta a la lista de Gacelas de la ultima gen
+		ultimaGen.add(gac);
+	}
 
 	public void addPopulation(Generacion gen) {
 		this.population.add(gen);
 		countGeneration++;
+	}
+	
+	public void addDeathMap(String causaMuerte, Gacela gac){
+		this.deathMap.get(causaMuerte).add(gac); //actualizo el mapa
+	}
+	
+	private void inicializarDeathMap(){
+		List<Gacela> Laux1 = new LinkedList<>();
+		List<Gacela> Laux2 = new LinkedList<>();
+		List<Gacela> Laux3 = new LinkedList<>();
+		List<Gacela> Laux4 = new LinkedList<>();
+		List<Gacela> Laux5 = new LinkedList<>();
+		List<Gacela> Laux6 = new LinkedList<>();
+		this.deathMap.put("Comida de leones", Laux1);
+		this.deathMap.put("Comida de cocodrilos", Laux2);
+		this.deathMap.put("Enfermo", Laux3);
+		this.deathMap.put("Hambruna", Laux4);
+		this.deathMap.put("Alergia", Laux5);
+		this.deathMap.put("Vejez", Laux6);
 	}
 
 	private void inicializarSecuenciasADN() {
@@ -96,12 +136,13 @@ public class Simulation {
 		this.secuenciasADN.put(6,"CCGATATGT"); //Esteril
 		this.secuenciasADN.put(7,"GGTTAAACG"); //1 Hijo
 		
-		//significados de las causas de muerte (mayor comodidad para citar las causas
+		//significados de las causas de muerte (mayor comodidad para citar las causas)
 		this.secuenciasADNSignificados.put(1, "Comida de leones");
 		this.secuenciasADNSignificados.put(2, "Comida de cocodrilos");
 		this.secuenciasADNSignificados.put(3, "Enfermo");
 		this.secuenciasADNSignificados.put(4, "Hambruna");
 		this.secuenciasADNSignificados.put(5, "Alergia");
+		this.secuenciasADNSignificados.put(6, "Vejez"); //solo el 10% de las gacelas en cada simulac conoce este destino :(
 	}
 
 	public static int getRandomIntBetween(int min, int max) {

@@ -2,12 +2,9 @@ package TPfinal;
 
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,8 +18,7 @@ public class SimulationEinterfaz {
 		System.out.println("Please, enter the first generation path to txt file");
 	}
 
-	public void calcularPoblacInic(Scanner sc) { //no pasa copia del scanner, como es no primitivo pasa referencia
-		boolean flagPoblacInic = true; //true mientras que no se haya cargado la poblacion inicial
+	public boolean calcularPoblacInic(Scanner sc, boolean flagPoblacInic) { //no pasa copia del scanner, como es no primitivo pasa referencia
 		while(flagPoblacInic) {
 			String path = sc.next();
 			String poblacInicial = this.readFile(path);
@@ -31,8 +27,10 @@ public class SimulationEinterfaz {
 			}else{
 				this.createGenZero(poblacInicial);
 				flagPoblacInic = false;
+				return flagPoblacInic;
 			}
 		}
+		return flagPoblacInic;
 	}
 
 	public String readFile(String path) {
@@ -61,14 +59,27 @@ public class SimulationEinterfaz {
 		if (opcion.equalsIgnoreCase("1")) {
 			this.reproduccion();
 			this.mutacion(sc);
+			this.muerte();
 			return true;
 		}else if(opcion.equalsIgnoreCase("2")) {
+			for(Generacion gener : s.getGeneraciones()) {
+				System.out.println("Generacion: " + gener.genNumber());
+				for(Gacela g : gener.getListaGacelas()) {
+					System.out.println(g.getAdn());
+				}
+			}
 			return true;
 		}else if(opcion.equalsIgnoreCase("3")) {
 			return true;
 		}else if(opcion.equalsIgnoreCase("4")) {
-			//System.out.println("Esta seguro? Recuerde que se eliminaran todos los datos generados dentro de la Simulacion");
-			return false;
+			System.out.println("Esta seguro? Recuerde que se eliminaran todos los datos generados dentro de la Simulacion");
+			System.out.println("Ingrese OK si esta seguro o cualquier cosa si no lo esta");
+			if(sc.next().equalsIgnoreCase("OK")) {
+				return false;
+			}else {
+				return true;
+			}
+			
 		}else {
 			System.out.println("No se ha ingresado una opcion valida. Por favor, vuelva a intentarlo.");
 			return true;
@@ -92,7 +103,7 @@ public class SimulationEinterfaz {
 		int i1=0;
 		int i2=1;
 		List<Gacela> generationNueva = new LinkedList<>(); //instanceo la nueva generacion
-		
+
 		while(i1 < aReproducir.size() && i2 < aReproducir.size()) {
 			if(aReproducir.get(i1).getTipoReproduccion() != 0 && aReproducir.get(i2).getTipoReproduccion() != 0) {//si ninguno es esteril
 				createGen(aReproducir.get(i1),aReproducir.get(i2),s.getCountGeneration()+1, generationNueva); //la generacion es la ultima de la actualizada
@@ -109,16 +120,16 @@ public class SimulationEinterfaz {
 	private void mutacion(Scanner sc) {
 		System.out.println("La reproduccion se llevo a cabo satisfactoriamente.");
 		System.out.println("Por favor, ingrese que bases nitrogenadas quiere cambiar de las Gacelas que se enlistan");
-		List<Gacela> ultimaGenparaMutar = this.s.getUltimaGenerParaMutac();
+		List<Gacela> ultimaGenparaMutar = this.s.getUltimaGenerParaMutacoVejez((float) 0.5);
 		for(Gacela gac : ultimaGenparaMutar) {
-			gac.impPant(); //imprime cada Gacela a mutar
+			System.out.println(gac.getAdn()); //imprime cada Gacela a mutar
 		}
-		
+
 		String regex = "[CGAT]";
 		Pattern p = Pattern.compile(regex);
-		String BaseN1; //se elige String antes que char para evitar conflictos por si el usuario decide escribir una frase en vez
-		String BaseN2; //de un caracter
-		
+		String BaseN1 = new String(); //se elige String antes que char para evitar conflictos por si el usuario decide escribir una frase en vez
+		String BaseN2 = new String(); //de un caracter
+
 		boolean flagChequearBaseN1 = true;
 		while(flagChequearBaseN1) {
 			BaseN1 = sc.next();
@@ -136,19 +147,55 @@ public class SimulationEinterfaz {
 			Matcher m = p.matcher(BaseN2);
 			if(!m.matches()) {//si No matchea
 				System.out.println("No ha ingresado una base nitrogenada correcta. Debe ser C, G, A, o T en mayuscula. Vuelva a intentarlo.");
+			}else if(BaseN1 == BaseN2){
+				System.out.println("Se eligio la misma base nitrogenada como segunda opcion.");
+				System.out.println("Esto no provocaria mutacion alguna. Si esta seguro ingrese OK, o cualquier cosa si no lo esta.");
+				if(sc.next().equalsIgnoreCase("OK")) {
+					flagChequearBaseN2 = false;
+				}else { System.out.println("Ingrese nuevamente la segunda base nitrogenada a modificar");}
 			}else {
-				flagChequearBaseN2 = false;
+				flagChequearBaseN2 = false; //es decir, se ingresaron dos bases nitrogenadas distintas
+			}
+		}
+
+		if(BaseN1 != BaseN2) {
+			//se procede a efectuar la mutacion
+			for(Gacela gac : ultimaGenparaMutar) {
+				String chAmutar = gac.getAdn(); //caracteres a mutar
+				StringBuilder newADNmutado = new StringBuilder();
+
+				for(int n = 0; n<chAmutar.length(); n++) {//para cada caracter produzco la mutacion si es una de las Bases Nitrogenada que tengo que cambiar
+					if(chAmutar.charAt(n) == BaseN1.charAt(0)) {
+						newADNmutado.append(BaseN2.charAt(0)); //si es el caracter Base Nitrogenada 1 se cambia a la 2
+					}else if(chAmutar.charAt(n) == BaseN2.charAt(0)) {
+						newADNmutado.append(BaseN1.charAt(0)); //si es el caracter Base Nitrogenada 2 se cambia a la 1
+					}else {
+						newADNmutado.append(chAmutar.charAt(n)); //si no es uno de las bases buscadas No se cambia
+					}
+				}
+				gac.setADN(newADNmutado.toString());
+				//Luego de la mutacion, se agregan las gacelas mutadas devuelta a la ultima generacion
+				this.s.addUltimaGener(gac);
+			}
+		}
+	}
+
+	private void muerte(){
+		List<Gacela> GenMuertePorVejez = this.s.getTodasMenosUltimaGener((float) 0.1); //remueve 10% de las gacelas
+		for(Gacela gac : GenMuertePorVejez) {
+			gac.setMuertePorVejez(); //cambia a true el status de muerte por vejez
+			s.addDeathMap(gac.getCausaDeMuerte(), gac); //agrega al death map
+		}
+		//listo vejez, ahora la ultima generacion puede morir por mutaciones
+		List<Gacela> ultimaGenMuerePorMutac = this.s.getGeneraciones().get(s.getCountGeneration()-1).getListaGacelas();
+		//asi obtengo la lista de gacelas de la ultima generacion
+		for(Gacela gac : ultimaGenMuerePorMutac) {
+			if(gac.porMorir()) { //solo si tiene gen de muerte se muere por cualquiera de los genes de muerte que llegue a contener
+				s.addDeathMap( gac.getCausaDeMuerte(),gac);
+				ultimaGenMuerePorMutac.remove(gac); //y se elimina de la lista
 			}
 		}
 		
-		//se procede a efectuar la mutacion
-		for(Gacela gac : ultimaGenparaMutar) {
-			char[] chAmutar = gac.getAdn().toCharArray(); //caracteres a mutar
-			StringBuilder newADNmutado = new StringBuilder();
-			for(char ch : chAmutar) {//para cada caracter chequeo si es una de las Bases Nitrogenada que tengo que cambiar
-				
-			}
-		}
 	}
 	
 	public void createGen(Gacela g1, Gacela g2, int count, List<Gacela> generationNueva) {
